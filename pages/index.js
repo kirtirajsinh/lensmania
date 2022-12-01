@@ -2,7 +2,8 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useState, useEffect } from 'react'
 import { useAccount, useProvider, useSigner, useSignMessage } from 'wagmi';
 import { client, challenge, authenticate, getDefaultProfile, parseJwt } from '../api'
-import {useProfile} from '../components/WalletContext'
+import {useProfiles} from '../components/WalletContext'
+import { useProfile, usePublications } from "@memester-xyz/lens-use";
 
 
 export default function Home() {
@@ -13,7 +14,20 @@ export default function Home() {
         console.log("Settled", { data, error });
       },
     });
-    const {setLensToken, setLensHandle, setLensProfile, lensHandle, lensToken} = useProfile()
+    const {setLensToken, setLensHandle, setLensProfile, lensHandle, lensToken} = useProfiles()
+
+    const { data } = useProfile("boredhead.lens");
+    // const { publications } = usePublications(profileId, [PublicationType.POST, PublicationType.COMMENT]);
+
+
+    useEffect(() =>{
+      console.log('data', data)
+      
+      // if (data) {
+      //   console.log('publications', publications)
+      // }
+    }
+    , [data])
 
     useEffect(() => {
       if(address){
@@ -71,7 +85,7 @@ export default function Home() {
     <>
       <ConnectButton />
       { !isDisconnected && !lensToken && <button onClick={login}>Login with Lens</button>}
-      {lensToken && <div>Logged in as {lensHandle}</div>}
+      {lensToken && address && <div>Logged in as {lensHandle}</div>}
     </>
   )
 }

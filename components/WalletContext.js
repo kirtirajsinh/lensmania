@@ -31,4 +31,4 @@ export const WalletProvider = ({children}) => {
 </WalletContext.Provider>
     )
 }
-export const useProfile = () => useContext(WalletContext)
+export const useProfiles = () => useContext(WalletContext)
