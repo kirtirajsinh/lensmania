@@ -2,26 +2,24 @@ import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useState, useEffect } from 'react'
 import { useAccount, useProvider, useSigner, useSignMessage } from 'wagmi';
 import { client, challenge, authenticate, getDefaultProfile } from '../api'
+import {useProfile} from '../components/WalletContext'
 
 
 export default function Home() {
   const {address, isDisconnected} = useAccount();
-  const[lensToken, setLensToken] = useState(null)
-  const [profileId, setProfileId] = useState(null)
-  const [profile, setProfile] = useState(null)
-  const[handle, setHandle] = useState(null)
   const [session, setSession] = useState(null)
   const { signMessageAsync } = useSignMessage({
       onSettled(data, error) {
         console.log("Settled", { data, error });
       },
     });
+    const {setLensToken, setLensHandle, setLensProfile, lensHandle, lensToken} = useProfile()
 
     useEffect(() => {
       if(address){
         getProfiles();
       }
-    }, [setLensToken])
+    }, [address])
 
     const getProfiles = async () => {
       const response = await client.query({
@@ -29,8 +27,7 @@ export default function Home() {
         variables: { address: address }
       })
       console.log(response.data.defaultProfile.handle)
-      setProfileId(response.data.defaultProfile.id)
-      setHandle(response.data.defaultProfile.handle)
+      setLensHandle(response.data.defaultProfile.handle)
     }
 
 
@@ -64,14 +61,8 @@ export default function Home() {
   return (
     <>
       <ConnectButton />
-      {
-        address && !lensToken && (
-            <button onClick={login} className="border p-btn p-2 rounded " >Lens Login</button>
-        )
-      }
-      {
-        address && lensToken && (<button className=" border p-btn p-2 rounded">{handle}</button>)
-      }
+      { !isDisconnected && !lensToken && <button onClick={login}>Login with Lens</button>}
+      {lensToken && <div>Logged in as {lensHandle}</div>}
     </>
   )
 }

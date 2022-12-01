@@ -11,6 +11,7 @@ import {
   WagmiConfig,
 } from 'wagmi';
 import { publicProvider } from 'wagmi/providers/public';
+import {WalletProvider} from '../components/WalletContext'
 
 const { chains, provider } = configureChains(
   [chain.mainnet, chain.polygon, chain.optimism, chain.arbitrum],
@@ -35,7 +36,10 @@ function MyApp({ Component, pageProps }) {
     
   <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider chains={chains}>
+        <WalletProvider>
+ 
          <Component {...pageProps} />
+        </WalletProvider>
       </RainbowKitProvider>
     </WagmiConfig>
   )
