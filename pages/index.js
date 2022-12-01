@@ -1,7 +1,7 @@
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useState, useEffect } from 'react'
 import { useAccount, useProvider, useSigner, useSignMessage } from 'wagmi';
-import { client, challenge, authenticate, getDefaultProfile } from '../api'
+import { client, challenge, authenticate, getDefaultProfile, parseJwt } from '../api'
 import {useProfile} from '../components/WalletContext'
 
 
@@ -50,9 +50,18 @@ export default function Home() {
           }
         })
               /* if user authentication is successful, you will receive an accessToken and refreshToken */
-        const { data: { authenticate: { accessToken }}} = authData
-        setLensToken(accessToken)
-        setSession(authData.data.authenticate)
+              const { accessToken, refreshToken } = authData.data.authenticate;
+              const accessTokenData = parseJwt(accessToken);
+              setLensToken(accessToken)
+              console.log(accessToken, refreshToken)
+              localStorage.setItem(
+                'STORAGE_KEY',
+                JSON.stringify({
+                  accessToken,
+                  refreshToken,
+                  exp: accessTokenData.exp,
+                })
+              );
       } catch (err) {
         console.log('Error signing in: ', err)
       }

@@ -67,3 +67,64 @@ query ValidatePublicationMetadata ($metadatav2: PublicationMetadataV2Input!) {
   }
 }
 `
+
+export function parseJwt(token) {
+  var base64Url = token.split(".")[1];
+  var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+  var jsonPayload = decodeURIComponent(
+    atob(base64)
+      .split("")
+      .map(function (c) {
+        return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+      })
+      .join("")
+  );
+
+  return JSON.parse(jsonPayload);
+}
+
+// Refresh Token 
+const REFRESH_AUTHENTICATION = `
+  mutation($request: RefreshRequest!) { 
+    refresh(request: $request) {
+      accessToken
+      refreshToken
+    }
+ }`
+
+ const refreshAuth = (refreshToken) => {
+  return client.mutate({
+    mutation: gql(REFRESH_AUTHENTICATION),
+    variables: {
+      request: {
+        refreshToken,
+      },
+    },
+  });
+};
+
+export async function refreshAuthToken() {
+  const token = JSON.parse(localStorage.getItem('STORAGE_KEY'));
+  console.log('LensToken', token)
+  if (!token) return;
+  try {
+    console.log("token:", { token });
+    const authData = await refreshAuth(token.refreshToken);
+
+    console.log("authData:", { authData });
+    const { accessToken, refreshToken } = authData.data.refresh;
+    const exp = parseJwt(refreshToken).exp;
+
+    localStorage.setItem(
+      'STORAGE_KEY',
+      JSON.stringify({
+        accessToken,
+        refreshToken,
+        exp,
+      })
+    );
+
+  } catch (err) {
+    console.log("error:", err);
+  }
+}
