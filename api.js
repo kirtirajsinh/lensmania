@@ -6,7 +6,9 @@ const API_URL = 'https://api.lens.dev'
 
 
 const authLink = setContext((_, { headers }) => {
+  // get the authentication token from local storage if it exists
     const token = window.localStorage.getItem('lens-auth-token')
+    console.log({token})
     return {
       headers: {
         ...headers,
@@ -77,7 +79,7 @@ export function parseJwt(token) {
       .map(function (c) {
         return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
       })
-      .join("")
+      .join("") 
   );
 
   return JSON.parse(jsonPayload);
@@ -125,6 +127,39 @@ export async function refreshAuthToken() {
     );
 
   } catch (err) {
-    console.log("error:", err);
+    // refresh();
   }
 }
+
+export const CREATE_POST_TYPED_DATA = `
+mutation($request: CreatePublicPostRequest!) { 
+  createPostTypedData(request: $request) {
+    id
+    expiresAt
+    typedData {
+      types {
+        PostWithSig {
+          name
+          type
+        }
+      }
+      domain {
+        name
+        chainId
+        version
+        verifyingContract
+      }
+      value {
+        nonce
+        deadline
+        profileId
+        contentURI
+        collectModule
+        collectModuleInitData
+        referenceModule
+        referenceModuleInitData
+      }
+    }
+ }
+}
+`;

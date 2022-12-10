@@ -13,10 +13,15 @@ import {
 import { publicProvider } from 'wagmi/providers/public';
 import {WalletProvider} from '../components/WalletContext'
 import { ApolloClient, InMemoryCache, ApolloProvider, gql } from '@apollo/client';
+import { client } from '../api';
+import { QueryClient, QueryClientProvider, useQuery } from "react-query";
+const queryClient = new QueryClient();
+
+
 
 
 const { chains, provider } = configureChains(
-  [chain.mainnet, chain.polygon, chain.optimism, chain.arbitrum],
+  [chain.mainnet, chain.polygonMumbai, chain.polygon, chain.optimism, chain.arbitrum],
   [
     publicProvider()
   ]
@@ -42,13 +47,15 @@ const apolloClient = new ApolloClient({
 function MyApp({ Component, pageProps }) {
   return(
     
-  <WagmiConfig client={wagmiClient}>
+    <WagmiConfig client={wagmiClient}>
       <RainbowKitProvider chains={chains}>
-      <ApolloProvider client={apolloClient}>
+    <QueryClientProvider client={queryClient} contextSharing={true}>
+      <ApolloProvider client={client} >
         <WalletProvider>
-         <Component {...pageProps} />
+           <Component {...pageProps} />
         </WalletProvider>
         </ApolloProvider>
+          </QueryClientProvider>
       </RainbowKitProvider>
     </WagmiConfig>
   )
