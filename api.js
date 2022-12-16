@@ -6,16 +6,14 @@ const API_URL = 'https://api.lens.dev'
 
 
 const authLink = setContext((_, { headers }) => {
-  // get the authentication token from local storage if it exists
-    const token = window.localStorage.getItem('lens-auth-token')
-    console.log({token})
-    return {
-      headers: {
-        ...headers,
-        authorization: token ? `Bearer ${token}` : "",
-      }
+  const token = window.localStorage.getItem('lens-auth-token')
+  return {
+    headers: {
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
     }
-  })
+  }
+})
   
   const httpLink = createHttpLink({
     uri: API_URL
@@ -59,16 +57,7 @@ query DefaultProfile($address: EthereumAddress!) {
 }
 `
 
-export const validateMetadata = gql`
-query ValidatePublicationMetadata ($metadatav2: PublicationMetadataV2Input!) {
-  validatePublicationMetadata(request: {
-    metadatav2: $metadatav2
-  }) {
-    valid
-    reason
-  }
-}
-`
+
 
 export function parseJwt(token) {
   var base64Url = token.split(".")[1];
@@ -131,8 +120,10 @@ export async function refreshAuthToken() {
   }
 }
 
-export const CREATE_POST_TYPED_DATA = `
-mutation($request: CreatePublicPostRequest!) { 
+
+
+export const createPostTypedData = gql`
+mutation createPostTypedData($request: CreatePublicPostRequest!) {
   createPostTypedData(request: $request) {
     id
     expiresAt
@@ -160,6 +151,21 @@ mutation($request: CreatePublicPostRequest!) {
         referenceModuleInitData
       }
     }
- }
+  }
 }
-`;
+`
+
+
+
+
+export const validateMetadata = gql`
+query ValidatePublicationMetadata ($metadatav2: PublicationMetadataV2Input!) {
+  validatePublicationMetadata(request: {
+    metadatav2: $metadatav2
+  }) {
+    valid
+    reason
+  }
+}
+`
+
